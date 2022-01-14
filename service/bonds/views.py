@@ -1,8 +1,9 @@
 from django.shortcuts import render
-from rest_framework.response import Response
 from rest_framework import mixins, viewsets
-from bonds.serializers import BondSerializer
+from rest_framework.response import Response
+
 from bonds.models import Bond
+from bonds.serializers import BondSerializer
 
 
 class BondsViewSet(
@@ -13,7 +14,7 @@ class BondsViewSet(
     viewsets.GenericViewSet):
     
     serializer_class = BondSerializer
-    queryset = Bond.objects.filter(buyer_id__isnull=False)    
+    queryset = Bond.objects.filter(buyer_id__isnull=True)    
     
     def buy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -24,3 +25,8 @@ class BondsViewSet(
         self.perform_update(serializer)
         
         return Response(serializer.data)
+    
+    
+    def list_bonds_to_sell(self, request, *args, **kwargs):
+        instance = self.get_object()
+        

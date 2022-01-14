@@ -9,5 +9,5 @@ index = BondsViewSet.as_view({'get': 'list', 'post': 'create'})
 urlpatterns = [
     path('bonds', index, name='bonds-list'),
     path('bonds/<str:pk>', detail, name='bonds-detail'),
-    path('bonds/<str:pk>/buy', buy, name='bonds-buy')
+    path('bonds/<str:pk>/buy', buy, name='bonds-buy'),
 ]
