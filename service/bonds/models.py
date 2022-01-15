@@ -1,12 +1,24 @@
+from datetime import date
+
 from django.contrib.auth import get_user_model
 from django.core.validators import (MaxValueValidator, MinLengthValidator,
                                     MinValueValidator)
 from django.db import models
 from django.utils.dateparse import parse_date
+
 from bonds.utils import currency_exchange
 
 User = get_user_model()
 
+class BondManager(models.Manager):
+    def get_usd(self):
+        rate = MoneyExchange.objects.for_date(date.today())
+        queryset = self.get_queryset()
+        for q in queryset:
+            q.price = q.price/rate.rate
+        return queryset
+            
+            
 class Bond(models.Model):
     buyer = models.OneToOneField(User, null=True, on_delete=models.CASCADE, related_name='%(app_label)s_%(class)s_related')
     seller = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -16,8 +28,9 @@ class Bond(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     purchased = models.DateTimeField(null=True, blank=True)
+    objects = BondManager()
     
-    
+
 class MoneyExchangeManager(models.Manager):
     
     def for_date(self, date_str):
@@ -25,8 +38,9 @@ class MoneyExchangeManager(models.Manager):
         query = self.filter(date=date)
         if query.exists():
             return query.first
-        MoneyExchange = self.model
-    
+        instance = self.create(date=date_str, rate=currency_exchange(date_str.isoformat()))
+        return instance
+        
     
 class MoneyExchange(models.Model):
     date = models.DateField()
