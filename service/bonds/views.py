@@ -3,7 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from bonds.models import Bond
 from bonds.serializers import BondSerializer
-
+from rest_framework.throttling import ScopedRateThrottle
+    
 class BondsViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -13,6 +14,8 @@ class BondsViewSet(
     viewsets.GenericViewSet):
     
     serializer_class = BondSerializer
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'get_bonds'
     queryset = Bond.objects.filter(buyer_id__isnull=True)    
     permission_classes = [IsAuthenticated]
     
