@@ -1,19 +1,16 @@
 from datetime import date
-
 from django.contrib.auth import get_user_model
 from django.core.validators import (MaxValueValidator, MinLengthValidator,
                                     MinValueValidator)
 from django.db import models
-from django.utils.dateparse import parse_date
-
 from bonds.utils import currency_exchange
 
 User = get_user_model()
 
 class BondManager(models.Manager):
-    def get_usd(self):
+    
+    def get_usd(self, queryset):
         rate = MoneyExchange.objects.for_date(date.today())
-        queryset = self.get_queryset()
         for q in queryset:
             q.price = q.price/rate.rate
         return queryset
@@ -33,21 +30,17 @@ class Bond(models.Model):
 
 class MoneyExchangeManager(models.Manager):
     
-    def for_date(self, date_str):
-        date = parse_date(date_str)
+    def for_date(self, date):
         query = self.filter(date=date)
         if query.exists():
-            return query.first
-        instance = self.create(date=date_str, rate=currency_exchange(date_str.isoformat()))
+            return query.first()
+        rate = currency_exchange(date)   
+        instance = self.create(date=date, rate=rate)
         return instance
         
     
 class MoneyExchange(models.Model):
     date = models.DateField()
-    # USD/MXN
     rate = models.DecimalField(max_digits=10, decimal_places=4)
     created = models.DateTimeField(auto_now_add=True)
     objects = MoneyExchangeManager()
-    
-    def is_sold(self):
-        return self.buyer_id is not None
