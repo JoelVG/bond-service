@@ -17,8 +17,8 @@ class BondManager(models.Manager):
             
             
 class Bond(models.Model):
-    buyer = models.OneToOneField(User, null=True, on_delete=models.CASCADE, related_name='%(app_label)s_%(class)s_related')
-    seller = models.OneToOneField(User, on_delete=models.CASCADE)
+    buyer = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='%(app_label)s_%(class)s_related')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=40, validators=[MinLengthValidator(3)])
     quantity = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10000)])
     price = models.DecimalField(max_digits=13, decimal_places=4, default=0.0000, validators=[MinValueValidator(0.0000), MaxValueValidator(100000000.0000)])
